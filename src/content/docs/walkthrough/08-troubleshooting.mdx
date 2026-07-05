@@ -1,0 +1,50 @@
+---
+title: Troubleshooting
+description: Operator mistakes during apply — prevention and recovery
+---
+
+Most failures are avoided by [Pre-flight](/walkthrough/03-preflight/) checks before each apply. Console behaviour that looks wrong but is not a deploy failure — dashboard lag, high **Unmanaged** counts, pool column semantics — is covered in [Planning vs Monitoring](/architecture/03-planning-vs-monitoring/) and the [FAQ](/reference/02-faq/).
+
+## Wrong account for org-bootstrap
+
+**Error:** `AccessDeniedException from AWSOrganizations`
+
+**Cause:** `org-bootstrap/` run from a member account. Only the management account can enable RAM org sharing and delegate IPAM admin.
+
+**Fix:** Set `AWS_PROFILE=ipam-org`, confirm with `aws sts get-caller-identity`, then re-run `org-bootstrap/`.
+
+## Expired or wrong profile
+
+**Error:** `No valid credential sources found`
+
+**Cause:** Expired SSO session or profile mismatch for the stack you are applying.
+
+**Fix:** `aws sso login --profile <profile>`, set `AWS_PROFILE`, and run `aws sts get-caller-identity` before retrying. See [Pre-flight](/walkthrough/03-preflight/).
+
+## Workload pool_id out of date
+
+**Error:** Pool not found, access denied on pool, or plan wants to change `pool_id`
+
+**Cause:** `pool_id` in gitignored `terraform.tfvars` does not match current `ipam/` outputs after a re-apply or pool recreation.
+
+**Fix:** Refresh from outputs and update before workload apply:
+
+```bash
+terraform -chdir=examples/multi-account/ipam output nz_dev_pool_id
+terraform -chdir=examples/multi-account/ipam output au_sandbox_pool_id
+```
+
+## Where to check
+
+| Area               | Console path                                           |
+| ------------------ | ------------------------------------------------------ |
+| Delegation         | Organizations → Settings → IPAM delegated admin        |
+| RAM org sharing    | RAM → Settings → Sharing with AWS Organizations        |
+| Pool allocations   | IPAM → Planning → Pools → Allocations                  |
+| VPC pool binding   | EC2 → VPCs → select VPC → Details → IPv4 IPAM pool ID  |
+| Resource discovery | IPAM → Monitoring → Resources (filter by account/CIDR) |
+
+## Related pages
+
+- [Verification](/walkthrough/07-verification/) — post-apply checks
+- [Teardown](/walkthrough/09-teardown/) — destroy ordering and blocked destroys

@@ -1,0 +1,61 @@
+---
+title: VPC IPAM Multi-Account Walkthrough
+description: Progressive walkthrough for four-account AWS VPC IPAM with regional pools and RAM sharing
+template: splash
+hero:
+  tagline: Deploy org-wide VPC IPAM across four AWS accounts and two regions — delegated admin, RAM pool sharing, and pool-backed workload VPCs
+  actions:
+    - text: Get Started
+      link: /walkthrough/01-overview/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account
+      icon: external
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+import Tooltip from "@/components/Tooltip.astro";
+
+## What you'll build
+
+<CardGrid>
+  <Card
+    title="Delegate and plan"
+    icon="setting"
+    link="/architecture/01-account-topology/"
+  >
+    Management account delegates <Tooltip term="ipam" label="IPAM" /> admin to a
+    dedicated <Tooltip term="network-account" label="network account" /> and
+    enables RAM org sharing before pools are created.
+  </Card>
+  <Card
+    title="Share regional pools"
+    icon="rocket"
+    link="/architecture/04-ram-and-onboarding/"
+  >
+    Network account builds a three-level{" "}
+    <Tooltip term="pool-hierarchy" label="pool hierarchy" /> and{" "}
+    <Tooltip term="ram-share" label="RAM-shares" /> leaf pools to dev and
+    sandbox workload accounts.
+  </Card>
+  <Card
+    title="Allocate workload VPCs"
+    icon="document"
+    link="/walkthrough/06-workload-deploy/"
+  >
+    Workload stacks consume shared pools via the manual{" "}
+    <Tooltip term="stack-contract" label="stack contract" /> — pool-backed VPCs
+    show formal <Tooltip term="allocation" label="allocations" /> in the network
+    account.
+  </Card>
+  <Card
+    title="Verify two planes"
+    icon="open-book"
+    link="/walkthrough/07-verification/"
+  >
+    Confirm <Tooltip term="planning-plane" label="Planning" /> allocations and{" "}
+    <Tooltip term="monitoring-plane" label="Monitoring" /> resource discovery —
+    org-wide dashboard widgets lag behind pool Allocations.
+  </Card>
+</CardGrid>

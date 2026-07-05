@@ -1,0 +1,45 @@
+---
+title: Account Topology
+description: Four-account IPAM layout with delegation and RAM sharing
+---
+
+import ArchitectureDiagram from "@/components/ArchitectureDiagram.astro";
+import Tooltip from "@/components/Tooltip.astro";
+
+## Four-account topology
+
+<ArchitectureDiagram />
+
+## Delegated admin model
+
+AWS Organizations requires a **dedicated network member account** as the IPAM delegated administrator. The management account **cannot** host IPAM — attempting to do so returns `IpamOrganizationDelegatedAdminCannotBeRootAccount`.
+
+| Account    | Profile           | Region           | Responsibility                                  |
+| ---------- | ----------------- | ---------------- | ----------------------------------------------- |
+| Management | `ipam-org`        | Global           | `org-bootstrap/` — delegation + RAM org sharing |
+| Network    | `ipam-network`    | `ap-southeast-6` | `ipam/` — IPAM instance, pools, RAM shares      |
+| Dev        | `ipam-workload-a` | `ap-southeast-6` | `workload-a/` — pool-backed VPC                 |
+| Sandbox    | `ipam-workload-b` | `ap-southeast-2` | `workload-b/` — pool-backed VPC                 |
+
+The `org-bootstrap/` stack runs `aws_vpc_ipam_organization_admin_account` to designate the network account as IPAM admin. It also enables `aws_ram_sharing_with_organization` — required before pools can be shared inside the org.
+
+## Private vs Public scopes
+
+AWS creates two default scopes per IPAM:
+
+| Scope       | Pool count (this example) | Usage                                           |
+| ----------- | ------------------------- | ----------------------------------------------- |
+| **Private** | 5                         | All `org` / regional / leaf pools under RFC1918 |
+| **Public**  | 0                         | Empty by design — no BYOIP or public IPv4 pools |
+
+All pool work, [RAM shares](/architecture/04-ram-and-onboarding/), and [allocations](/walkthrough/07-verification/) are under **Private**. The Public scope is normal and costs nothing while empty.
+
+## RAM relationships
+
+<Tooltip term="ram-share" label="RAM share" /> grants **permission** to use a
+pool. <Tooltip term="allocation" label="IPAM allocation" /> (linking the VPC
+CIDR to the pool) is what makes usage visible in the network account. See [RAM
+and onboarding](/architecture/04-ram-and-onboarding/) for the three onboarding
+layers.
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

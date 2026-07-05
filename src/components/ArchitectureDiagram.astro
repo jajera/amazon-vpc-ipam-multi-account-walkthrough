@@ -1,0 +1,39 @@
+---
+import {
+  architectureDiagramHeight,
+  architectureDiagramWidth,
+  architectureDiagramInner,
+} from "../../scripts/architecture-diagram-inner.mjs";
+---
+
+<figure class="architecture-diagram">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={architectureDiagramWidth}
+    height={architectureDiagramHeight}
+    viewBox={`0 0 ${architectureDiagramWidth} ${architectureDiagramHeight}`}
+    fill="none"
+    role="img"
+    aria-label="Four-account VPC IPAM topology with delegation and RAM pool sharing"
+  >
+    <rect
+      class="canvas"
+      width={architectureDiagramWidth}
+      height={architectureDiagramHeight}
+      rx="12"
+    />
+    <rect
+      class="canvas-border"
+      x="1"
+      y="1"
+      width={architectureDiagramWidth - 2}
+      height={architectureDiagramHeight - 2}
+      rx="11"
+    />
+    <g set:html={architectureDiagramInner} />
+  </svg>
+</figure>
+
+<style is:global>
+  @import "./architecture-diagram.css";
+</style>

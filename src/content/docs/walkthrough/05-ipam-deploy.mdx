@@ -1,0 +1,83 @@
+---
+title: IPAM Deploy
+description: Create IPAM, five pools, and RAM shares in the network account
+---
+
+Stack: `ipam/` — runs in the **network account** (`ap-southeast-6`).
+
+## What this stack does
+
+- Creates the IPAM instance (home region `ap-southeast-6`)
+- Builds the five-pool hierarchy under the Private scope
+- RAM-shares leaf pools to workload accounts via `ram_share_principals`
+
+The root `org` pool has no locale. Regional and leaf pools carry locale for NZ and AU. Select **Private** in the IPAM scope dropdown when verifying.
+
+:::caution[Credential context]
+Switch to `ipam-network` before applying. Run `aws sts get-caller-identity` and confirm you are in the network account, region `ap-southeast-6`.
+:::
+
+## Execution context
+
+| Field   | Value            |
+| ------- | ---------------- |
+| Account | Network          |
+| Profile | `ipam-network`   |
+| Region  | `ap-southeast-6` |
+
+## Apply
+
+```bash
+export AWS_PROFILE=ipam-network
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/ipam init
+terraform -chdir=examples/multi-account/ipam apply
+```
+
+Create `examples/multi-account/ipam/terraform.tfvars` locally (gitignored):
+
+```hcl
+workload_account_a_id = "111111111111"
+workload_account_b_id = "222222222222"
+```
+
+## Key outputs
+
+```bash
+terraform -chdir=examples/multi-account/ipam output operating_regions
+terraform -chdir=examples/multi-account/ipam output nz_dev_pool_id
+terraform -chdir=examples/multi-account/ipam output au_sandbox_pool_id
+terraform -chdir=examples/multi-account/ipam output ram_share_pool_keys
+```
+
+| Output               | Purpose                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| `operating_regions`  | `ap-southeast-6`, `ap-southeast-2` (from pool locales + home) |
+| `nz_dev_pool_id`     | Copy to `workload-a/terraform.tfvars` as `pool_id`            |
+| `au_sandbox_pool_id` | Copy to `workload-b/terraform.tfvars` as `pool_id`            |
+
+## Stack contract
+
+Copy pool IDs manually into workload `terraform.tfvars` — no `terraform_remote_state`:
+
+| IPAM output          | Workload input | File                          |
+| -------------------- | -------------- | ----------------------------- |
+| `nz_dev_pool_id`     | `pool_id`      | `workload-a/terraform.tfvars` |
+| `au_sandbox_pool_id` | `pool_id`      | `workload-b/terraform.tfvars` |
+
+Example placeholder:
+
+```hcl
+pool_id = "ipam-pool-0123456789abcdef0"
+```
+
+## Expected result
+
+- IPAM exists in home region `ap-southeast-6`
+- Five pools under Private scope (see [Pool hierarchy](/architecture/02-pool-hierarchy/))
+- RAM shares `org-nz-dev` and `org-au-sandbox` Active
+
+Next: [Workload deploy](/walkthrough/06-workload-deploy/).
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

@@ -1,0 +1,36 @@
+---
+title: Pool Hierarchy
+description: Three-level CIDR tree with locales and VPC allocations
+---
+
+## Pool hierarchy
+
+Three-level tree under the Private scope: `org` → `org/nz` / `org/au` → `org/nz/dev` / `org/au/sandbox`.
+
+## CIDR plan
+
+| Pool path        | CIDR            | Locale           | RAM share                  | Workload output     |
+| ---------------- | --------------- | ---------------- | -------------------------- | ------------------- |
+| `org`            | `10.0.0.0/8`    | —                | —                          | —                   |
+| `org/nz`         | `10.64.0.0/12`  | `ap-southeast-6` | —                          | —                   |
+| `org/au`         | `10.128.0.0/12` | `ap-southeast-2` | —                          | —                   |
+| `org/nz/dev`     | `10.64.0.0/16`  | `ap-southeast-6` | `org-nz-dev` → Dev         | VPC `10.64.0.0/20`  |
+| `org/au/sandbox` | `10.128.0.0/16` | `ap-southeast-2` | `org-au-sandbox` → Sandbox | VPC `10.128.0.0/20` |
+
+### VPC allocations
+
+| Resource         | CIDR            | Region           | Notes                              |
+| ---------------- | --------------- | ---------------- | ---------------------------------- |
+| VPC (workload-a) | `10.64.0.0/20`  | `ap-southeast-6` | First allocation from dev pool     |
+| VPC (workload-b) | `10.128.0.0/20` | `ap-southeast-2` | First allocation from sandbox pool |
+
+## Root pool locale
+
+The root `org` pool has **no locale** — it is a global container. Setting a locale on the parent pool locks all children to that region and causes `InvalidParameterCombination` errors.
+
+Locales are set on regional and leaf pools only:
+
+- `org/nz`, `org/nz/dev` → `ap-southeast-6`
+- `org/au`, `org/au/sandbox` → `ap-southeast-2`
+
+See [RAM and onboarding](/architecture/04-ram-and-onboarding/) for how workloads consume these pools.

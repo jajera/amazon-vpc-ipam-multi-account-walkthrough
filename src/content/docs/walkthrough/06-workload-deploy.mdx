@@ -1,0 +1,88 @@
+---
+title: Workload Deploy
+description: Apply workload-a and workload-b with pool-backed VPCs
+---
+
+Stacks `workload-a/` and `workload-b/` can run **in parallel** after `ipam/` completes.
+
+## Stack contract
+
+Each workload receives `pool_id` from `ipam/` outputs via gitignored `terraform.tfvars`:
+
+```hcl
+# workload-a/terraform.tfvars (gitignored — use real pool ID from ipam output)
+pool_id = "ipam-pool-0123456789abcdef0"
+```
+
+The VPC is created from the shared pool via `modules/ipam-vpc/`:
+
+```hcl
+module "vpc" {
+  source = "../modules/ipam-vpc"
+
+  ipv4_ipam_pool_id   = var.pool_id
+  ipv4_netmask_length = 20
+}
+```
+
+## Workload-a (NZ dev)
+
+:::caution[Credential context]
+Switch to `ipam-workload-a`. Run `aws sts get-caller-identity` and confirm the dev account, region `ap-southeast-6`.
+:::
+
+| Field   | Value                           |
+| ------- | ------------------------------- |
+| Account | Dev                             |
+| Profile | `ipam-workload-a`               |
+| Region  | `ap-southeast-6`                |
+| Pool    | `org/nz/dev` (`nz_dev_pool_id`) |
+
+```bash
+export AWS_PROFILE=ipam-workload-a
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/workload-a init
+terraform -chdir=examples/multi-account/workload-a apply
+```
+
+## Workload-b (AU sandbox)
+
+:::caution[Credential context]
+Switch to `ipam-workload-b`. Run `aws sts get-caller-identity` and confirm the sandbox account, region `ap-southeast-2`.
+:::
+
+| Field   | Value                                   |
+| ------- | --------------------------------------- |
+| Account | Sandbox                                 |
+| Profile | `ipam-workload-b`                       |
+| Region  | `ap-southeast-2`                        |
+| Pool    | `org/au/sandbox` (`au_sandbox_pool_id`) |
+
+```bash
+export AWS_PROFILE=ipam-workload-b
+export AWS_REGION=ap-southeast-2
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/workload-b init
+terraform -chdir=examples/multi-account/workload-b apply
+```
+
+## Outputs
+
+```bash
+terraform -chdir=examples/multi-account/workload-a output vpc_cidr   # 10.64.0.0/20
+terraform -chdir=examples/multi-account/workload-b output vpc_cidr   # 10.128.0.0/20
+```
+
+## Expected result
+
+- Each workload VPC CIDR allocated from the intended shared pool (`/20`)
+- Pool allocations visible to IPAM admin account (may lag briefly)
+
+Check **Allocations** first after apply; the summary dashboard may lag — see [Verification](/walkthrough/07-verification/).
+
+See [RAM and onboarding](/architecture/04-ram-and-onboarding/) for the three-layer onboarding model.
+
+Next: [Verification](/walkthrough/07-verification/).
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

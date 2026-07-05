@@ -1,0 +1,73 @@
+---
+title: Teardown
+description: Destroy stacks in reverse dependency order
+---
+
+Destroy in reverse dependency order to avoid orphaned allocations and RAM share errors.
+
+## Destroy order
+
+1. `workload-a/` and `workload-b/` (parallel OK)
+2. `ipam/` (network account)
+3. `org-bootstrap/` (management account — optional)
+
+:::caution[Allocation dependencies]
+Pool and IPAM destroy fails if workload allocations still exist. Destroy both workload stacks first and confirm **Allocations** tabs are empty before running `ipam destroy`.
+:::
+
+## Step 1 — Workloads
+
+```bash
+export AWS_PROFILE=ipam-workload-a
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/workload-a destroy
+
+export AWS_PROFILE=ipam-workload-b
+export AWS_REGION=ap-southeast-2
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/workload-b destroy
+```
+
+:::note
+AWS usually removes the workload VPC quickly. Terraform may still wait and **time out** even though the VPC is already gone. Re-run `terraform destroy` for that stack — repeating is safe.
+:::
+
+## Step 2 — IPAM
+
+```bash
+export AWS_PROFILE=ipam-network
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/ipam destroy
+```
+
+:::note
+IPAM pool and RAM share destroy can appear to stall for a while with little console output. Let it run — a single `terraform destroy` usually completes successfully once workload allocations are gone.
+:::
+
+## Step 3 — Org bootstrap (optional)
+
+:::tip[Iterative testing]
+Keeping `org-bootstrap/` in place is common between test iterations. Org delegation and RAM org sharing persist — you can re-apply `ipam/` and workloads without re-running org-bootstrap.
+:::
+
+```bash
+export AWS_PROFILE=ipam-org
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/org-bootstrap destroy
+```
+
+Only run this if you need to remove IPAM delegation and RAM org sharing entirely.
+
+## Troubleshooting destroy failures
+
+| Symptom                             | Recovery                                                |
+| ----------------------------------- | ------------------------------------------------------- |
+| Pool destroy blocked by allocations | Re-run workload destroy; check Allocations tab          |
+| RAM share still associated          | Ensure workloads destroyed; wait for allocation cleanup |
+| Org-bootstrap destroy blocked       | Remove IPAM instance and pools first                    |
+
+See [Troubleshooting](/walkthrough/08-troubleshooting/) if destroy fails after following the order above.
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

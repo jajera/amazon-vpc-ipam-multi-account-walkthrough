@@ -1,0 +1,73 @@
+---
+title: Prerequisites
+description: AWS accounts, CLI profiles, Terraform versions, and regional constraints before deployment
+---
+
+import Callout from "@/components/Callout.astro";
+import Tooltip from "@/components/Tooltip.astro";
+
+## Before you start
+
+1. Clone the [upstream module](https://github.com/tfstack/terraform-aws-ipam)
+2. Work from the **module repository root** for all `terraform -chdir=examples/multi-account/...` commands in this walkthrough
+
+## Four accounts and profiles
+
+| Account    | Profile           | Region           | Stack            |
+| ---------- | ----------------- | ---------------- | ---------------- |
+| Management | `ipam-org`        | Global           | `org-bootstrap/` |
+| Network    | `ipam-network`    | `ap-southeast-6` | `ipam/`          |
+| Dev        | `ipam-workload-a` | `ap-southeast-6` | `workload-a/`    |
+| Sandbox    | `ipam-workload-b` | `ap-southeast-2` | `workload-b/`    |
+
+<Callout type="note" title="Why these regions?">
+  This example uses **ap-southeast-6** (NZ-primary dev) and **ap-southeast-2**
+  (AU sandbox). Pool <Tooltip term="locale" label="locales" /> enforce that a NZ
+  pool cannot allocate a VPC in Sydney — see [Pool
+  Hierarchy](/architecture/02-pool-hierarchy/).
+</Callout>
+
+Configure one profile per account in `~/.aws/config` and map each to your organization's SSO permission sets.
+
+Placeholder account IDs for documentation only (use real values in gitignored `terraform.tfvars`):
+
+| Profile           | Placeholder account ID |
+| ----------------- | ---------------------- |
+| `ipam-org`        | `333333333333`         |
+| `ipam-network`    | `123456789012`         |
+| `ipam-workload-a` | `111111111111`         |
+| `ipam-workload-b` | `222222222222`         |
+
+## Terraform workspace hygiene
+
+```bash
+git clone https://github.com/tfstack/terraform-aws-ipam.git
+cd terraform-aws-ipam
+```
+
+Each stack uses a gitignored `terraform.tfvars` for real account IDs and pool IDs. Example placeholders live in `*.tfvars.example` files only:
+
+```hcl
+# workload-a/terraform.tfvars.example
+pool_id = "ipam-pool-0123456789abcdef0"
+```
+
+| File                             | Gitignored | Contains                     |
+| -------------------------------- | ---------- | ---------------------------- |
+| `org-bootstrap/terraform.tfvars` | Yes        | Network account ID           |
+| `ipam/terraform.tfvars`          | Yes        | Workload account IDs         |
+| `workload-a/terraform.tfvars`    | Yes        | `pool_id` from `ipam` output |
+| `workload-b/terraform.tfvars`    | Yes        | `pool_id` from `ipam` output |
+
+Never commit real 12-digit account IDs or live `ipam-pool-*` IDs to this documentation repo or to version control in the module clone.
+
+## Region and locale sanity
+
+- Workload-a region: `ap-southeast-6` (matches `org/nz/dev` locale)
+- Workload-b region: `ap-southeast-2` (matches `org/au/sandbox` locale)
+
+See [Account topology](/architecture/01-account-topology/) for the four-account layout.
+
+Next: [Pre-flight](/walkthrough/03-preflight/) before your first apply.
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

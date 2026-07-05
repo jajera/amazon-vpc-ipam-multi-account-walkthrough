@@ -1,0 +1,124 @@
+.architecture-diagram {
+  margin: 1rem 0;
+}
+
+.architecture-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 1200px;
+}
+
+.architecture-diagram .canvas {
+  fill: var(--sl-color-gray-6, #232f3e);
+}
+
+.architecture-diagram .canvas-border {
+  stroke: #ff9900;
+  stroke-width: 1;
+  fill: none;
+  opacity: 0.35;
+}
+
+.architecture-diagram .header-title {
+  fill: var(--sl-color-text);
+  font-family: var(--sl-font-system);
+  font-size: 20px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.architecture-diagram .header-muted {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 15px;
+  text-anchor: middle;
+}
+
+.architecture-diagram .account-title {
+  text-anchor: middle;
+}
+
+.architecture-diagram .account-panel {
+  fill: var(--sl-color-gray-7, var(--sl-color-bg));
+  stroke-width: 1.5;
+  opacity: 0.95;
+}
+
+.architecture-diagram .region-band {
+  fill: var(--sl-color-gray-6);
+  stroke: var(--sl-color-gray-5);
+  stroke-width: 1;
+}
+
+.architecture-diagram .region-label {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 14px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.architecture-diagram .node-label {
+  fill: var(--sl-color-text);
+  font-family: var(--sl-font-system);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.architecture-diagram .node-sublabel {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.architecture-diagram .link-delegate {
+  stroke: #e7157b;
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.architecture-diagram .link-ram {
+  stroke: var(--sl-color-accent, #7b68ee);
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 7 5;
+}
+
+.architecture-diagram .arrow-delegate {
+  fill: #e7157b;
+}
+
+.architecture-diagram .arrow-ram {
+  fill: var(--sl-color-accent, #7b68ee);
+}
+
+.architecture-diagram .gutter {
+  fill: var(--sl-color-accent, #7b68ee);
+  opacity: 0.08;
+}
+
+.architecture-diagram .legend-text {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 14px;
+}
+
+.architecture-diagram .legend-delegate {
+  stroke: #e7157b;
+  stroke-width: 2;
+  fill: none;
+}
+
+.architecture-diagram .legend-ram {
+  stroke: var(--sl-color-accent, #7b68ee);
+  stroke-width: 2;
+  stroke-dasharray: 7 5;
+  fill: none;
+}
+
+.architecture-diagram .icon-glyph {
+  fill: #ffffff;
+}
