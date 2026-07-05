@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { architectureDiagramCss } from "./diagram-styles.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -8,6 +9,7 @@ const iconsDir = join(root, "public/diagram-icons");
 const svgOut = join(root, "public/architecture-diagram.svg");
 const innerOut = join(root, "scripts/architecture-diagram-inner.mjs");
 const ogSvgOut = join(root, "public/og-image.svg");
+const ogPngOut = join(root, "public/og-image.png");
 
 const localIcons = join(root, "../aws-icons");
 const AWS_ICONS_BASE = existsSync(localIcons)
@@ -590,6 +592,8 @@ const ogSvg = buildOgImageSvg();
 writeFileSync(svgOut, architectureSvg);
 writeFileSync(innerOut, innerModule);
 writeFileSync(ogSvgOut, ogSvg);
+await sharp(Buffer.from(ogSvg)).png().toFile(ogPngOut);
 console.log(`Wrote ${svgOut}`);
 console.log(`Wrote ${innerOut}`);
 console.log(`Wrote ${ogSvgOut}`);
+console.log(`Wrote ${ogPngOut}`);
