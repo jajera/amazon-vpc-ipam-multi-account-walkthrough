@@ -1,0 +1,82 @@
+---
+title: Pre-flight
+description: Checks to run before every terraform apply or destroy in the upstream example repository
+---
+
+import Callout from "@/components/Callout.astro";
+
+## Objective
+
+Confirm account context, variable completeness, and credential validity **before every** `terraform apply` or `terraform destroy` in the [upstream example repo](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/).
+
+## Checklist
+
+1. Set `AWS_PROFILE` for the account you are working in
+2. Confirm identity: `aws sts get-caller-identity`
+3. Re-login SSO if the session expired: `aws sso login --profile <profile>`
+4. **Workload stacks:** confirm `pool_id` in gitignored `terraform.tfvars` matches latest `ipam/` outputs
+5. Run from a clone of `terraform-aws-ipam` using `-chdir`
+
+## Identity verification
+
+```bash
+export AWS_PROFILE=ipam-org
+aws sts get-caller-identity
+
+export AWS_PROFILE=ipam-network
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+
+export AWS_PROFILE=ipam-workload-a
+export AWS_REGION=ap-southeast-6
+aws sts get-caller-identity
+
+export AWS_PROFILE=ipam-workload-b
+export AWS_REGION=ap-southeast-2
+aws sts get-caller-identity
+```
+
+<Callout type="caution" title="Credential verification">
+  Run `aws sts get-caller-identity` with the correct profile before every apply.
+  An expired SSO session or wrong profile causes `No valid credential sources
+  found` and can apply changes to the wrong account.
+</Callout>
+
+## Init, validate, plan
+
+Replace `<stack>` with the target path (`org-bootstrap`, `ipam`, `workload-a`, `workload-b`):
+
+```bash
+terraform -chdir=examples/multi-account/<stack> init
+terraform -chdir=examples/multi-account/<stack> validate
+terraform -chdir=examples/multi-account/<stack> plan
+```
+
+| Command    | Purpose                                   |
+| ---------- | ----------------------------------------- |
+| `init`     | Download providers and initialize backend |
+| `validate` | Confirm HCL syntax and provider schema    |
+| `plan`     | Preview resource graph before apply       |
+
+## pool_id guardrail
+
+Before workload apply, confirm pool IDs match `ipam/` outputs:
+
+```bash
+terraform -chdir=examples/multi-account/ipam output nz_dev_pool_id
+terraform -chdir=examples/multi-account/ipam output au_sandbox_pool_id
+grep pool_id examples/multi-account/workload-a/terraform.tfvars
+grep pool_id examples/multi-account/workload-b/terraform.tfvars
+```
+
+If they differ, update gitignored `terraform.tfvars` before continuing.
+
+## Dependency sequencing
+
+- `org-bootstrap/` applied successfully before `ipam/`
+- `ipam/` applied successfully before `workload-a/` / `workload-b/`
+- RAM sharing with Organizations enabled in management account
+
+Next: [Org Bootstrap](/walkthrough/04-org-bootstrap/).
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

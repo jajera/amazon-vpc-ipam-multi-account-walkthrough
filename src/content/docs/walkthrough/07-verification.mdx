@@ -1,0 +1,97 @@
+---
+title: Verification
+description: Confirm allocations, Managed VPCs, and RAM shares
+---
+
+After workload apply, verify both the **Planning** plane (formal allocations) and the **Monitoring** plane (org-wide discovery). See [Planning vs Monitoring](/architecture/03-planning-vs-monitoring/) for the two-plane model.
+
+All console checks run as **`ipam-network`** in `ap-southeast-6` with **Private** scope selected.
+
+## CLI outputs
+
+```bash
+terraform -chdir=examples/multi-account/workload-a output vpc_cidr
+terraform -chdir=examples/multi-account/workload-b output vpc_cidr
+terraform -chdir=examples/multi-account/ipam output ram_share_pool_keys
+```
+
+Confirm pool-backed VPC in the workload account:
+
+```bash
+aws ec2 describe-vpcs \
+  --vpc-ids "$(terraform -chdir=examples/multi-account/workload-a output -raw vpc_id)" \
+  --profile ipam-workload-a \
+  --query 'Vpcs[0].{Cidr:CidrBlock,Pool:Ipv4IpamPoolId}'
+```
+
+`Pool` must be set (not null).
+
+## Planning — five pools
+
+**Planning → Pools** — expect five pools:
+
+| Pool path        | CIDR            | Locale           |
+| ---------------- | --------------- | ---------------- |
+| `org`            | `10.0.0.0/8`    | —                |
+| `org/nz`         | `10.64.0.0/12`  | `ap-southeast-6` |
+| `org/nz/dev`     | `10.64.0.0/16`  | `ap-southeast-6` |
+| `org/au`         | `10.128.0.0/12` | `ap-southeast-2` |
+| `org/au/sandbox` | `10.128.0.0/16` | `ap-southeast-2` |
+
+Leaf pools show ~**3% Assigned** after workload apply. **0% Allocated** at leaf level is normal — **Assigned** is the workload VPC CIDR; **Allocated** tracks child-pool splits only. See [Pool hierarchy](/architecture/02-pool-hierarchy/).
+
+## Planning — Allocations
+
+**Planning → Pools → `org/nz/dev` → Allocations:**
+
+- CIDR: `10.64.0.0/20`
+- Owner: dev workload account
+- Status: **Managed**
+
+**Planning → Pools → `org/au/sandbox` → Allocations:**
+
+- CIDR: `10.128.0.0/20`
+- Owner: sandbox workload account
+- Status: **Managed**
+
+## RAM shares
+
+**Resource Access Manager → Shared by me → Resource shares:**
+
+| Share name       | Status | Principal       |
+| ---------------- | ------ | --------------- |
+| `org-nz-dev`     | Active | Dev account     |
+| `org-au-sandbox` | Active | Sandbox account |
+
+**Planning → Pools → leaf pool → Resource shares** — same shares as RAM console.
+
+See [RAM and onboarding](/architecture/04-ram-and-onboarding/) for RAM vs allocation distinction.
+
+## Monitoring — Resources
+
+**Monitoring → Resources** — filter by workload account and VPC CIDR:
+
+| Workload   | Filter                                                                 |
+| ---------- | ---------------------------------------------------------------------- |
+| workload-a | Owner = dev account, region `ap-southeast-6`, CIDR `10.64.0.0/20`      |
+| workload-b | Owner = sandbox account, region `ap-southeast-2`, CIDR `10.128.0.0/20` |
+
+Confirm **Compliance** shows **Managed** for the pool-backed VPC CIDRs.
+
+## Monitoring — Dashboard
+
+:::caution[Dashboard sync]
+Allocations update first (minutes). Monitoring → Dashboard may lag by hours and includes org-wide legacy VPCs. A high **Unmanaged** count does not mean this example failed — filter Resources by account/CIDR instead.
+:::
+
+| Widget              | Expected for this example                    |
+| ------------------- | -------------------------------------------- |
+| Resource CIDR types | Large count (mostly subnets org-wide)        |
+| Management state    | Small **Managed** slice (two `/20` VPCs)     |
+| Overlapping CIDRs   | Often high from default `172.31.0.0/16` VPCs |
+
+Check **Planning → Resource discoveries → Default → Last successful discovery time** if Monitoring data looks stale.
+
+Next: [Teardown](/walkthrough/09-teardown/).
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

@@ -1,0 +1,100 @@
+.doc-diagram {
+  margin: 1rem 0;
+}
+
+.doc-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.doc-diagram .frame {
+  fill: var(--sl-color-gray-6);
+  stroke: var(--sl-color-gray-5);
+  stroke-width: 1.5;
+}
+
+.doc-diagram .panel {
+  fill: var(--sl-color-gray-7, var(--sl-color-bg));
+  stroke: var(--sl-color-gray-5);
+  stroke-width: 1;
+}
+
+.doc-diagram .panel.planning {
+  stroke: #8c4fff;
+  stroke-opacity: 0.55;
+}
+
+.doc-diagram .panel.monitoring {
+  stroke: var(--sl-color-accent);
+  stroke-opacity: 0.55;
+}
+
+.doc-diagram .panel-title {
+  fill: var(--sl-color-text);
+  font-family: var(--sl-font-system);
+  font-size: 15px;
+  font-weight: 600;
+  text-anchor: middle;
+}
+
+.doc-diagram .panel-scope {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 12px;
+  text-anchor: middle;
+}
+
+.doc-diagram .panel-item {
+  fill: var(--sl-color-text);
+  font-family: var(--sl-font-system);
+  font-size: 13px;
+  text-anchor: middle;
+}
+
+.doc-diagram .source {
+  fill: var(--sl-color-gray-6);
+  stroke: var(--sl-color-gray-5);
+  stroke-width: 1.5;
+}
+
+.doc-diagram .source-label {
+  fill: var(--sl-color-text);
+  font-family: var(--sl-font-system-mono, ui-monospace, monospace);
+  font-size: 11px;
+  font-weight: 500;
+  text-anchor: middle;
+}
+
+.doc-diagram .source-detail {
+  fill: var(--sl-color-gray-3);
+  font-family: var(--sl-font-system);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.doc-diagram .link {
+  stroke: var(--sl-color-gray-4);
+  stroke-width: 1.5;
+  fill: none;
+}
+
+.doc-diagram .link.planning {
+  stroke: #8c4fff;
+}
+
+.doc-diagram .link.monitoring {
+  stroke: var(--sl-color-accent);
+}
+
+.doc-diagram .arrow-head-planning {
+  fill: #8c4fff;
+}
+
+.doc-diagram .arrow-head-monitoring {
+  fill: var(--sl-color-accent);
+}
+
+.planning-monitoring-diagram svg {
+  max-width: 800px;
+}

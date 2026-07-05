@@ -1,0 +1,38 @@
+---
+title: AWS References
+description: Official AWS documentation and upstream module links
+---
+
+## AWS documentation
+
+- [Integrate IPAM with accounts in an AWS Organization](https://docs.aws.amazon.com/vpc/latest/ipam/enable-integ-ipam.html)
+- [Share an IPAM pool using AWS RAM](https://docs.aws.amazon.com/vpc/latest/ipam/share-pool-ipam.html)
+- [Allocate CIDRs from an IPAM pool](https://docs.aws.amazon.com/vpc/latest/ipam/allocate-cidrs-ipam.html)
+- [Monitor CIDR usage with the IPAM dashboard](https://docs.aws.amazon.com/vpc/latest/ipam/monitor-cidr-usage-ipam.html)
+- [Monitor CIDR usage by resource](https://docs.aws.amazon.com/vpc/latest/ipam/monitor-cidr-compliance-ipam.html)
+- [Exclude organizational units from IPAM](https://docs.aws.amazon.com/vpc/latest/ipam/exclude-ous.html)
+- [View resource discovery details](https://docs.aws.amazon.com/vpc/latest/ipam/res-disc-work-with-view.html)
+- [Create an IPAM](https://docs.aws.amazon.com/vpc/latest/ipam/create-ipam.html) — home vs operating regions
+- [Enable resource sharing within AWS Organizations](https://docs.aws.amazon.com/ram/latest/userguide/getting-started-sharing.html)
+- [Amazon VPC pricing — IPAM tab](https://aws.amazon.com/vpc/pricing/)
+
+## AWS blog posts
+
+- [Managing IP pools across VPCs and regions using Amazon VPC IP Address Manager](https://aws.amazon.com/blogs/networking-and-content-delivery/managing-ip-pools-across-vpcs-and-regions-using-amazon-vpc-ip-address-manager/)
+- [Collecting AWS networking information in multi-account environments](https://aws.amazon.com/blogs/networking-and-content-delivery/collecting-aws-networking-information-in-large-multi-account-environments/)
+
+## Upstream module
+
+| Resource              | Link                                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Module repository     | [tfstack/terraform-aws-ipam](https://github.com/tfstack/terraform-aws-ipam)                                                |
+| Multi-account example | [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)                 |
+| Design walkthrough    | [WALKTHROUGH.md](https://github.com/tfstack/terraform-aws-ipam/blob/main/.kiro/specs/multi-account-example/WALKTHROUGH.md) |
+| Apply findings        | [FINDINGS.md](https://github.com/tfstack/terraform-aws-ipam/blob/main/examples/multi-account/FINDINGS.md)                  |
+| Example README        | [README.md](https://github.com/tfstack/terraform-aws-ipam/blob/main/examples/multi-account/README.md)                      |
+
+## This site
+
+- [Overview](/) — landing page with success criteria
+- [Walkthrough](/walkthrough/02-prerequisites/) — apply, verify, destroy
+- [Architecture](/architecture/01-account-topology/) — system design

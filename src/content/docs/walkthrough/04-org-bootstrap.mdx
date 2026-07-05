@@ -1,0 +1,69 @@
+---
+title: Org Bootstrap
+description: Delegate IPAM admin and enable RAM org sharing
+---
+
+Stack: `org-bootstrap/` — runs in the **management account** only.
+
+## What this stack does
+
+- Delegates IPAM admin to the network member account via `aws_vpc_ipam_organization_admin_account`
+- Enables RAM sharing with AWS Organizations via `aws_ram_sharing_with_organization`
+
+:::danger[Organizations-level change]
+This stack modifies AWS Organizations configuration: IPAM delegation and RAM org sharing. Run only from the management account (`ipam-org`). Member accounts cannot call `EnableSharingWithAwsOrganization`.
+:::
+
+RAM org sharing runs **here only** — not in `ipam/`. The `ipam/` stack creates pool-level RAM shares but requires org-level RAM sharing to be enabled first.
+
+## Execution context
+
+| Field   | Value                      |
+| ------- | -------------------------- |
+| Account | Management                 |
+| Profile | `ipam-org`                 |
+| Region  | Global (Organizations API) |
+
+## Apply
+
+From a clone of `terraform-aws-ipam`:
+
+```bash
+export AWS_PROFILE=ipam-org
+aws sts get-caller-identity
+terraform -chdir=examples/multi-account/org-bootstrap init
+terraform -chdir=examples/multi-account/org-bootstrap apply
+```
+
+Create `examples/multi-account/org-bootstrap/terraform.tfvars` locally (gitignored) with your network account ID:
+
+```hcl
+network_account_id = "123456789012"
+```
+
+## Expected result
+
+- Network account becomes delegated IPAM admin
+- RAM org sharing is enabled (trusted access for Resource Access Manager)
+- AWS creates `AWSServiceRoleForIPAM` in org member accounts
+
+## Verify
+
+```bash
+# Confirm delegation (management account)
+aws organizations list-delegated-administrators \
+  --service-principal ipam.amazonaws.com
+
+# Confirm RAM org sharing enabled
+aws ram get-resource-share-associations \
+  --association-type PRINCIPAL \
+  --query 'associations[?principal==`arn:aws:organizations::333333333333:organization/o-example`]'
+```
+
+Replace placeholder IDs with your real values when running locally.
+
+See [RAM and onboarding](/architecture/04-ram-and-onboarding/) for how this enables pool sharing in the next step.
+
+Next: [IPAM deploy](/walkthrough/05-ipam-deploy/).
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

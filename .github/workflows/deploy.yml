@@ -1,0 +1,23 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  pages:
+    uses: actionsforge/actions/.github/workflows/astro-pages-deploy.yml@main
+    with:
+      node-version: "22"
+      validate-command: npm run validate
+      test-command: npm run test

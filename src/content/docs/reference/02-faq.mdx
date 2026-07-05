@@ -1,0 +1,58 @@
+---
+title: FAQ
+description: Trade-offs and non-obvious IPAM behavior
+---
+
+import Tooltip from "@/components/Tooltip.astro";
+
+## Home region
+
+**Why ap-southeast-6 home if org ops are in Sydney?**
+
+Organizations has no home region. IPAM home is where the network team creates the IPAM resource. This example chose NZ because primary dev workloads are in `ap-southeast-6`. Sydney-centric orgs could use `ap-southeast-2` as home — operating regions still cover both via pool locales.
+
+## Dedicated network account
+
+**Why a dedicated network account?**
+
+The management account cannot host IPAM. A network account separates IPAM/RAM administration from application accounts. See [Account topology](/architecture/01-account-topology/).
+
+## Public scope empty
+
+**Why is the Public IPAM scope empty?**
+
+Creating an IPAM always provisions two default scopes: **Private** (RFC1918 VPC space) and **Public** (BYOIP / public IPv4). The module defaults to `scope_type = "private"`, so all pools are under Private. Public has no pools and no extra cost.
+
+## RAM vs allocation vs monitoring
+
+**Does RAM share make workload IP usage show in network IPAM?**
+
+<Tooltip term="ram-share" label="RAM share" /> grants permission to use the pool
+— visible in RAM and on the pool **Resource shares** tab. Formal VPC usage
+appears only when the workload creates a VPC with **`ipv4_ipam_pool_id`**
+(**Allocations** tab). Org-wide **Monitoring** is separate (resource discovery).
+See [RAM and onboarding](/architecture/04-ram-and-onboarding/).
+
+## Dashboard sync
+
+**Why doesn't the IPAM dashboard show Managed CIDRs right after redeploy?**
+
+Different console areas update at different speeds — **Allocations** is usually first; dashboard widgets lag org-wide discovery (often hours). Default VPCs and legacy VPCs keep **Unmanaged** and **Overlapping** counts high. See [Planning vs Monitoring](/architecture/03-planning-vs-monitoring/).
+
+## Monitoring scope
+
+**Does the monitoring dashboard only show resources from our IPAM pools?**
+
+No. **Monitoring → Dashboard** and **Monitoring → Resources** show **all** discovered private CIDRs in org member accounts. The pool tree in `ipam/main.tf` controls **Planning** only. RAM share does not exclude other accounts from discovery.
+
+## Resource count vs pool count
+
+**Why do I see 70+ resources but only five IPAM pools?**
+
+Pools are planning containers. Discovery inventories every subnet and VPC in monitored accounts — subnets alone often outnumber pools by an order of magnitude. Unmanaged legacy VPCs and overlapping default VPCs add further rows.
+
+## Leaf pool utilization
+
+**Why does a leaf pool show 0% Allocated but ~3% Assigned?**
+
+**Allocated** tracks space given to child pools or formal sub-allocations. Leaf pools have no children, so **Allocated** can stay 0%. **Assigned** tracks VPC/resource usage — one `/20` from a `/16` leaf pool is ~2.99% assigned.

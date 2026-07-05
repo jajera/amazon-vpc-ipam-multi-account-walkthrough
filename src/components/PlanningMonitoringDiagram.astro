@@ -1,0 +1,81 @@
+---
+/** IPAM console — Planning (pool-scoped) vs Monitoring (org-wide discovery) */
+---
+
+<figure class="doc-diagram planning-monitoring-diagram">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 800 220"
+    fill="none"
+    role="img"
+    aria-label="IPAM Planning plane fed by ipam and workload stacks; Monitoring plane fed by org-bootstrap resource discovery"
+  >
+    <defs>
+      <marker
+        id="pm-arrow-planning"
+        markerWidth="8"
+        markerHeight="8"
+        refX="7"
+        refY="4"
+        orient="auto"
+      >
+        <polygon class="arrow-head-planning" points="0 0, 8 4, 0 8"></polygon>
+      </marker>
+      <marker
+        id="pm-arrow-monitoring"
+        markerWidth="8"
+        markerHeight="8"
+        refX="7"
+        refY="4"
+        orient="auto"
+      >
+        <polygon class="arrow-head-monitoring" points="0 0, 8 4, 0 8"></polygon>
+      </marker>
+    </defs>
+
+    <rect class="frame" x="1" y="1" width="798" height="218" rx="10"></rect>
+
+    <rect class="panel planning" x="24" y="20" width="352" height="118" rx="8"
+    ></rect>
+    <text class="panel-title" x="200" y="44">Planning</text>
+    <text class="panel-scope" x="200" y="62">pool-scoped · network account</text>
+    <text class="panel-item" x="200" y="88"
+      >Pools · Allocations · Resource shares</text
+    >
+    <text class="panel-scope" x="200" y="122"
+      >Formal CIDR blocks from ipv4_ipam_pool_id</text
+    >
+
+    <rect class="panel monitoring" x="424" y="20" width="352" height="118" rx="8"
+    ></rect>
+    <text class="panel-title" x="600" y="44">Monitoring</text>
+    <text class="panel-scope" x="600" y="62">org-wide · all member accounts</text>
+    <text class="panel-item" x="600" y="88"
+      >Dashboard · Resources · ENIs</text
+    >
+    <text class="panel-scope" x="600" y="122"
+      >Discovered VPCs, subnets, ENIs — not pool-filtered</text
+    >
+
+    <rect class="source" x="56" y="162" width="148" height="44" rx="6"></rect>
+    <text class="source-label" x="130" y="182">ipam/ + workloads</text>
+    <text class="source-detail" x="130" y="196">pool_id on VPC create</text>
+
+    <rect class="source" x="596" y="162" width="148" height="44" rx="6"></rect>
+    <text class="source-label" x="670" y="182">org-bootstrap/</text>
+    <text class="source-detail" x="670" y="196">org integration + discovery</text>
+
+    <path
+      class="link planning"
+      d="M 130 162 L 130 138"
+      marker-end="url(#pm-arrow-planning)"></path>
+    <path
+      class="link monitoring"
+      d="M 670 162 L 670 138"
+      marker-end="url(#pm-arrow-monitoring)"></path>
+  </svg>
+</figure>
+
+<style is:global>
+  @import "./doc-diagram.css";
+</style>

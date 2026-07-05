@@ -1,0 +1,80 @@
+---
+title: RAM and Onboarding
+description: Three onboarding layers, RAM shares, and workload VPC pattern
+---
+
+RAM onboarding is not the same as IPAM usage showing up in the network account. Two separate mechanisms apply.
+
+## Onboarding flow
+
+| Step                   | Stack                         | Effect                                                |
+| ---------------------- | ----------------------------- | ----------------------------------------------------- |
+| Enable org RAM sharing | `org-bootstrap/` (management) | Required before pools can be shared in the org        |
+| Share leaf pools       | `ipam/` (network)             | `org-nz-dev` and `org-au-sandbox` RAM resource shares |
+| Consume pools          | `workload-a/` / `workload-b/` | VPC CIDR allocated via `ipv4_ipam_pool_id`            |
+
+## Three onboarding layers
+
+| Layer                   | Stack                         | Mechanism                                 | Effect                                     |
+| ----------------------- | ----------------------------- | ----------------------------------------- | ------------------------------------------ |
+| 1. Org IPAM integration | `org-bootstrap/`              | `aws_vpc_ipam_organization_admin_account` | Network account becomes IPAM admin         |
+| 2. Pool access (RAM)    | `ipam/`                       | `ram_share_principals` on leaf pools      | Workload account **may use** that pool     |
+| 3. Consumption          | `workload-a/` / `workload-b/` | `pool_id` + `ipv4_ipam_pool_id`           | Workload draws a CIDR from the shared pool |
+
+Layer 2 is defined in `ipam/main.tf`:
+
+```hcl
+dev = {
+  cidr                 = ["10.64.0.0/16"]
+  ram_share_principals = [var.workload_account_a_id]
+}
+```
+
+The root module creates `aws_ram_resource_share`, `aws_ram_resource_association` (pool ARN), and `aws_ram_principal_association` (account ID) per leaf pool.
+
+## RAM share names and principals
+
+| Pool path        | Resource share name | Principal                                 |
+| ---------------- | ------------------- | ----------------------------------------- |
+| `org/nz/dev`     | `org-nz-dev`        | Dev workload account (`111111111111`)     |
+| `org/au/sandbox` | `org-au-sandbox`    | Sandbox workload account (`222222222222`) |
+
+Verify in the network account (`ipam-network`, `ap-southeast-6`):
+
+- **RAM → Shared by me → Resource shares** — `org-nz-dev`, `org-au-sandbox` Active
+- **RAM → Shared by me → Shared resources** — two `ec2:IpamPool` resources
+- **IPAM → Planning → Pools → leaf pool → Resource shares** — same relationship
+
+## RAM vs allocation vs discovery
+
+| Concept                     | What it is                                             | Visible in network IPAM as                         |
+| --------------------------- | ------------------------------------------------------ | -------------------------------------------------- |
+| **RAM share**               | Permission for another account to use an IPAM pool     | RAM → **Shared by me**; pool → **Resource shares** |
+| **IPAM allocation**         | Pool CIDR bound to a VPC with owner account + region   | Pool → **Allocations** tab                         |
+| **Org resource monitoring** | IPAM discovers VPCs, subnets, ENIs via org integration | **Monitoring → Resources** → subnet → **ENIs**     |
+
+**RAM share alone does not create a formal pool allocation.** The workload must create a VPC with `ipv4_ipam_pool_id`.
+
+## Workload VPC pattern (`modules/ipam-vpc/`)
+
+```hcl
+module "vpc" {
+  source = "../modules/ipam-vpc"
+
+  ipv4_ipam_pool_id   = var.pool_id
+  ipv4_netmask_length = 20
+}
+```
+
+The module creates the VPC from the shared pool:
+
+```hcl
+resource "aws_vpc" "this" {
+  ipv4_ipam_pool_id   = var.ipv4_ipam_pool_id
+  ipv4_netmask_length = var.ipv4_netmask_length
+}
+```
+
+Subnet CIDRs are computed from the pool-allocated VPC CIDR at apply time.
+
+> **Upstream:** [examples/multi-account/](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/)

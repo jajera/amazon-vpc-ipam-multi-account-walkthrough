@@ -1,0 +1,78 @@
+---
+title: Overview
+description: What this walkthrough covers, repository boundaries, and the phased deployment model
+---
+
+import Tooltip from "@/components/Tooltip.astro";
+import ArchitectureDiagram from "@/components/ArchitectureDiagram.astro";
+
+## Purpose
+
+This walkthrough documents how to deploy and operate the [tfstack/terraform-aws-ipam](https://github.com/tfstack/terraform-aws-ipam/tree/main/examples/multi-account/) example — a <Tooltip term="terraform" label="Terraform" /> demo for four-account <Tooltip term="ipam" label="IPAM" /> with ANZ regional pools, <Tooltip term="ram-share" label="RAM sharing" />, and pool-backed workload VPCs.
+
+A dedicated <Tooltip term="network-account" label="network account" /> hosts org-wide IPAM in `ap-southeast-6`. Dev and sandbox workload accounts allocate `/20` VPC CIDRs from RAM-shared leaf pools in matching regions.
+
+The pattern uses `ipv4_ipam_pool_id` via `modules/ipam-vpc/`. It does **not** use Transit Gateway, VPC peering, NAT gateway, or management-account IPAM hosting.
+
+## Architecture at a glance
+
+<ArchitectureDiagram />
+
+Four AWS accounts: <Tooltip term="management-account" label="management" /> delegates admin and enables RAM org sharing; <Tooltip term="network-account" label="network" /> owns the pool tree; **dev** and **sandbox** create pool-backed VPCs after <Tooltip term="ram-share" label="RAM share" /> and the <Tooltip term="stack-contract" label="stack contract" />.
+
+## Accounts, regions, and stacks
+
+| Stack            | Account    | Profile           | Region           |
+| ---------------- | ---------- | ----------------- | ---------------- |
+| `org-bootstrap/` | Management | `ipam-org`        | Global           |
+| `ipam/`          | Network    | `ipam-network`    | `ap-southeast-6` |
+| `workload-a/`    | Dev        | `ipam-workload-a` | `ap-southeast-6` |
+| `workload-b/`    | Sandbox    | `ipam-workload-b` | `ap-southeast-2` |
+
+Leaf pools and expected VPC CIDRs:
+
+| Pool path        | Locale           | Workload VPC    |
+| ---------------- | ---------------- | --------------- |
+| `org/nz/dev`     | `ap-southeast-6` | `10.64.0.0/20`  |
+| `org/au/sandbox` | `ap-southeast-2` | `10.128.0.0/20` |
+
+## Phased dependency model
+
+| Step                          | Depends on       | Why                                                                  |
+| ----------------------------- | ---------------- | -------------------------------------------------------------------- |
+| `ipam/`                       | `org-bootstrap/` | Needs delegated admin and RAM org sharing                            |
+| `workload-a/` / `workload-b/` | `ipam/`          | Needs `pool_id` from `nz_dev_pool_id` / `au_sandbox_pool_id` outputs |
+
+Workloads may run in parallel after `ipam/` completes.
+
+## Walkthrough path
+
+1. [Planning vs Monitoring](/architecture/03-planning-vs-monitoring/) — two-plane IPAM console model
+2. [Tools and Accounts](/walkthrough/02-prerequisites/) — four accounts, profiles, upstream clone
+3. [Pre-flight](/walkthrough/03-preflight/) — SSO and identity checks before every apply
+4. [Org Bootstrap](/walkthrough/04-org-bootstrap/) — delegation + RAM org sharing
+5. [IPAM Deploy](/walkthrough/05-ipam-deploy/) — pools and RAM shares
+6. [Workload Deploy](/walkthrough/06-workload-deploy/) — pool-backed VPCs
+7. [Post-Deploy Checks](/walkthrough/07-verification/) — Allocations and Managed VPCs
+8. [Common Issues](/walkthrough/08-troubleshooting/) — operator mistakes (wrong profile, stack contract)
+9. [Teardown](/walkthrough/09-teardown/) — dependency-safe cleanup
+
+For conceptual depth before apply, read [Account Topology](/architecture/01-account-topology/) and [Pool Hierarchy](/architecture/02-pool-hierarchy/).
+
+## Success criteria
+
+Deployment succeeds when all of the following are true:
+
+- Leaf pools `org/nz/dev` and `org/au/sandbox` exist with expected CIDRs and locales
+- RAM shares `org-nz-dev` and `org-au-sandbox` are **Active**
+- Workload VPCs are **Managed** via `ipv4_ipam_pool_id`
+- Planning → Pools → **Allocations** shows `/20` blocks owned by workload accounts
+- Monitoring → **Resources** lists the pool-backed VPCs as **Managed** (filter by account and CIDR)
+
+## Intentionally excluded
+
+The upstream example deliberately omits:
+
+- Transit Gateway, VPC peering, VPN, or Direct Connect
+- NAT gateway (disabled for cost)
+- Public IPAM scope usage

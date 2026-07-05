@@ -1,0 +1,34 @@
+---
+title: Planning vs Monitoring
+description: Two IPAM console planes that answer different questions
+---
+
+import PlanningMonitoringDiagram from "@/components/PlanningMonitoringDiagram.astro";
+import Tooltip from "@/components/Tooltip.astro";
+
+## Two planes, two questions
+
+The VPC IPAM console splits into **Planning** and **Monitoring**. They use different data sources and answer different questions — do not treat the dashboard as a pool health check.
+
+<PlanningMonitoringDiagram />
+
+## Key properties
+
+1. A <Tooltip term="ram-share" label="RAM share" /> grants access — lets a workload account see a pool. It does not allocate a CIDR by itself.
+2. An <Tooltip term="allocation" label="allocation" /> requires `ipv4_ipam_pool_id` — a **Managed** VPC appears under **Planning → Pools → Allocations** only after workload create passes a pool ID.
+3. **Monitoring is org-scoped** — **Dashboard** and **Resources** inventory every discovered VPC, subnet, and ENI across org members, not only pools from `ipam/main.tf`.
+4. **Allocations update first** — **Planning → Allocations** usually reflects a new `/20` within minutes. **Monitoring → Dashboard** can lag by hours and stays noisy while legacy VPCs remain **Unmanaged**.
+
+:::caution[Common misread]
+A small **Managed** slice on the dashboard while **Resource CIDR types** is large does **not** mean pool-backed VPC create failed. Default and legacy VPCs dominate **Unmanaged** and **Overlapping** counts org-wide.
+:::
+
+## Where to look
+
+| Question                      | Console path                                                          |
+| ----------------------------- | --------------------------------------------------------------------- |
+| Did my VPC get a pool CIDR?   | **Planning → Pools → `org/nz/dev` or `org/au/sandbox` → Allocations** |
+| Are workload VPCs discovered? | **Monitoring → Resources** (filter by account and VPC CIDR)           |
+| Did RAM sharing work?         | **Planning → Pools → leaf pool → Resource shares** or RAM console     |
+
+Run console checks as **`ipam-network`** in `ap-southeast-6` with **Private** scope selected. Step-by-step checks, CLI commands, and dashboard widget notes are in [Post-Deploy Checks](/walkthrough/07-verification/).

@@ -1,0 +1,33 @@
+{
+  "name": "amazon-vpc-ipam-multi-account-walkthrough",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "validate": "prettier --check . && markdownlint-cli2 \"src/**/*.mdx\"",
+    "test": "npm run build",
+    "format": "prettier --write .",
+    "lint": "markdownlint-cli2 \"src/**/*.mdx\"",
+    "generate:diagram": "node scripts/generate-architecture-diagram.mjs"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.40.0",
+    "astro": "^6.4.6",
+    "starlight-base-path": "^0.1.1",
+    "starlight-theme-vintage": "^0.1.0"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1",
+    "js-yaml": "^4.2.0",
+    "markdown-it": "^14.2.0"
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.22.1",
+    "prettier": "^3.5.0",
+    "sharp": "^0.34.0",
+    "typescript": "^5.8.0"
+  }
+}
