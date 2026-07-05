@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
+import prettier from "prettier";
 import { architectureDiagramCss } from "./diagram-styles.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -590,7 +591,10 @@ export const architectureDiagramInner = ${JSON.stringify(diagramCore)};
 const ogSvg = buildOgImageSvg();
 
 writeFileSync(svgOut, architectureSvg);
-writeFileSync(innerOut, innerModule);
+writeFileSync(
+  innerOut,
+  await prettier.format(innerModule, { filepath: innerOut }),
+);
 writeFileSync(ogSvgOut, ogSvg);
 await sharp(Buffer.from(ogSvg)).png().toFile(ogPngOut);
 console.log(`Wrote ${svgOut}`);
