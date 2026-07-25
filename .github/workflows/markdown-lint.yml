@@ -1,4 +1,4 @@
-name: CI
+name: Markdown Lint
 
 on:
   pull_request: {}
@@ -10,5 +10,6 @@ permissions:
   pull-requests: read
 
 jobs:
-  pr-checks:
-    uses: actionsforge/actions/.github/workflows/astro-docs-pr-checks.yml@main
+  markdown-lint:
+    uses: actionsforge/actions/.github/workflows/markdown-lint.yml@main
+
