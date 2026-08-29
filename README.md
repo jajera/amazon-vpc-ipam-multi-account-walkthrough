@@ -2,7 +2,7 @@
 
 Step-by-step documentation site for deploying the [tfstack/terraform-aws-ipam](https://github.com/tfstack/terraform-aws-ipam) `examples/multi-account/` demo — four-account AWS VPC IPAM with regional pools, RAM sharing, and pool-backed workload VPCs.
 
-Published at [jajera.github.io/amazon-vpc-ipam-multi-account-walkthrough](https://jajera.github.io/amazon-vpc-ipam-multi-account-walkthrough/).
+Published at [jajera.github.io/amazon-vpc-ipam-multi-account-walkthrough](https://amazon-vpc-ipam-multi-account-walkthrough.johna.kiwi/).
 
 ## What this is / What this is not
 

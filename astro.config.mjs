@@ -4,8 +4,8 @@ import starlightThemeVintage from "starlight-theme-vintage";
 import { starlightBasePath } from "starlight-base-path";
 
 export default defineConfig({
-  site: "https://jajera.github.io",
-  base: "/amazon-vpc-ipam-multi-account-walkthrough/",
+  site: "https://amazon-vpc-ipam-multi-account-walkthrough.johna.kiwi",
+  base: "/",
   integrations: [
     starlight({
       title: "Amazon VPC IPAM Multi-Account Walkthrough",
