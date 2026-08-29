@@ -12,4 +12,3 @@ permissions:
 jobs:
   commitmsg-conform:
     uses: actionsforge/actions/.github/workflows/commitmsg-conform.yml@main
-
