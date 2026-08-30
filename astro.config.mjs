@@ -12,6 +12,9 @@ export default defineConfig({
       favicon: "/favicon.svg",
       description:
         "Step-by-step walkthrough for four-account AWS VPC IPAM with regional pools, RAM sharing, and pool-backed workload VPCs.",
+      components: {
+        Head: "./src/components/Head.astro",
+      },
       head: [
         {
           tag: "meta",
