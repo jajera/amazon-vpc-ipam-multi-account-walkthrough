@@ -1,0 +1,182 @@
+/* Patina token remap for Starlight (preview).
+   Match johna.kiwi / guides palette. Selectors include data-theme so we
+   beat Starlight’s own theme attribute rules. */
+
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=optional");
+
+:root,
+:root[data-theme="dark"] {
+  --sl-font: "Manrope", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --sl-font-system: var(--sl-font);
+  --sl-font-headings:
+    "Outfit", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+
+  /* Accent: #22d3ee / #67e8f9 */
+  --sl-color-accent-low: #0a3a45;
+  --sl-color-accent: #22d3ee;
+  --sl-color-accent-high: #67e8f9;
+
+  /* Gray ramp → Patina dark surfaces / ink */
+  --sl-color-white: #eef8fa;
+  --sl-color-gray-1: #eef8fa;
+  --sl-color-gray-2: #d4e8ee;
+  --sl-color-gray-3: #b7cdd4;
+  --sl-color-gray-4: #5a7a86;
+  --sl-color-gray-5: #2a4550;
+  --sl-color-gray-6: #102630;
+  --sl-color-gray-7: #0b171c;
+  --sl-color-black: #071014;
+
+  --sl-color-text: var(--sl-color-gray-2);
+  --sl-color-text-accent: var(--sl-color-accent-high);
+  --sl-color-text-invert: #04222a;
+
+  --sl-color-bg: #071014;
+  --sl-color-bg-nav: #071014;
+  --sl-color-bg-sidebar: #0b171c;
+  --sl-color-bg-inline-code: #102630;
+  --sl-color-bg-accent: var(--sl-color-accent);
+
+  --sl-color-hairline: rgb(34 211 238 / 18%);
+  --sl-color-hairline-light: rgb(34 211 238 / 12%);
+  --sl-color-hairline-shade: rgb(34 211 238 / 22%);
+
+  --patina-dot: color-mix(in oklab, var(--sl-color-accent) 8%, transparent);
+  --patina-accent-soft: color-mix(
+    in oklab,
+    var(--sl-color-accent) 12%,
+    transparent
+  );
+}
+
+:root[data-theme="light"] {
+  --sl-font: "Manrope", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --sl-font-system: var(--sl-font);
+  --sl-font-headings:
+    "Outfit", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+
+  /* Accent: #0b6f88 / #085568 */
+  --sl-color-accent-low: #d4eef4;
+  --sl-color-accent: #0b6f88;
+  --sl-color-accent-high: #085568;
+
+  --sl-color-white: #071014;
+  --sl-color-gray-1: #102830;
+  --sl-color-gray-2: #1a3844;
+  --sl-color-gray-3: #3a5560;
+  --sl-color-gray-4: #7a969e;
+  --sl-color-gray-5: #c5d4d8;
+  --sl-color-gray-6: #eef4f6;
+  --sl-color-gray-7: #f7fbfc;
+  --sl-color-black: #ffffff;
+
+  --sl-color-text: var(--sl-color-gray-2);
+  --sl-color-text-accent: var(--sl-color-accent-high);
+  --sl-color-text-invert: #ffffff;
+
+  --sl-color-bg: #eef4f6;
+  --sl-color-bg-nav: #ffffff;
+  --sl-color-bg-sidebar: #ffffff;
+  --sl-color-bg-inline-code: #f7fbfc;
+  --sl-color-bg-accent: var(--sl-color-accent);
+
+  --sl-color-hairline: #c5d4d8;
+  --sl-color-hairline-light: #d8e4e8;
+  --sl-color-hairline-shade: #b0c4ca;
+
+  --patina-dot: color-mix(in oklab, var(--sl-color-accent) 8%, transparent);
+  --patina-accent-soft: color-mix(
+    in oklab,
+    var(--sl-color-accent) 12%,
+    transparent
+  );
+}
+
+/*
+  johna.kiwi dotted field + soft accent glow. Shows in frame gutters;
+  Starlight panels stay solid for readability.
+*/
+html {
+  background-color: var(--sl-color-bg);
+  background-image:
+    radial-gradient(circle, var(--patina-dot) 1px, transparent 1.5px),
+    radial-gradient(
+      ellipse 80% 50% at 15% -5%,
+      var(--patina-accent-soft),
+      transparent 60%
+    );
+  background-size:
+    22px 22px,
+    100% 100%;
+  background-attachment: fixed;
+}
+
+body,
+.page {
+  background: transparent;
+}
+
+/* Soften Starlight chrome toward Patina surfaces */
+.sl-markdown-content :is(h1, h2, h3, h4, h5, h6):not(:where(.not-content *)) {
+  font-family: var(--sl-font-headings);
+  letter-spacing: -0.02em;
+}
+
+site-title {
+  font-family: var(--sl-font-headings);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* johna.kiwi theme toggle (icon cycle, not Starlight select) */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 2.5rem;
+  min-block-size: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sl-color-gray-3);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-accent);
+}
+
+.theme-toggle .icon {
+  inline-size: 1.1rem;
+  block-size: 1.1rem;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-icon {
+  display: none;
+}
+
+:root[data-theme-pref="auto"] .theme-icon-auto,
+:root[data-theme-pref="light"] .theme-icon-light,
+:root[data-theme-pref="dark"] .theme-icon-dark {
+  display: block;
+}
+
+.theme-toggle .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

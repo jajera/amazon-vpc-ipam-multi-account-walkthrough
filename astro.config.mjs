@@ -1,6 +1,5 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-import starlightThemeVintage from "starlight-theme-vintage";
 import { starlightBasePath } from "starlight-base-path";
 
 export default defineConfig({
@@ -13,6 +12,7 @@ export default defineConfig({
       description:
         "Step-by-step walkthrough for four-account AWS VPC IPAM with regional pools, RAM sharing, and pool-backed workload VPCs.",
       components: {
+        ThemeSelect: "./src/components/ThemeSelect.astro",
         Head: "./src/components/Head.astro",
       },
       head: [
@@ -54,7 +54,8 @@ export default defineConfig({
           },
         },
       ],
-      plugins: [starlightThemeVintage(), starlightBasePath()],
+      plugins: [starlightBasePath()],
+      customCss: ["./src/styles/patina-tokens.css"],
       social: [
         {
           icon: "github",
