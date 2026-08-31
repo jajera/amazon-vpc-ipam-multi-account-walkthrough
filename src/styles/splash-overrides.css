@@ -1,0 +1,123 @@
+.sidebar-pane ul.top-level > li > details > summary {
+  padding-inline-start: var(--sl-sidebar-item-padding-inline) !important;
+}
+
+.sidebar-pane ul.top-level > li > details > summary .caret {
+  display: none !important;
+}
+
+.sl-markdown-content :is(th, td):not(:where(.not-content *)) {
+  padding: 0.625rem 1rem;
+}
+
+/*
+  Keep scroll chrome stable across navigations.
+  - html: always reserve/show the window scrollbar so long↔short pages
+    do not flash the right-edge track (Reference is short; Deploy is not).
+  - side rails: keep overflow scrolling but hide the thumb so TOC / nav
+    remounts do not paint a transient scrollbar.
+*/
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+.sidebar-pane,
+.right-sidebar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-pane::-webkit-scrollbar,
+.right-sidebar::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/*
+  Keep sidebar link metrics stable so the active highlight does not
+  reflow label width (font-weight 400 → 600) on each navigation.
+*/
+.sidebar-pane a {
+  font-weight: 600;
+}
+
+/*
+  Always reserve TOC column width in the header grid, even on pages
+  without a TOC, so search / social / theme controls do not shift.
+*/
+:root:not([data-has-toc]) {
+  --__toc-width: var(--sl-sidebar-width);
+}
+
+/*
+  Constrain header + side rails to the docs frame (sidebar + article + TOC)
+  so the top bar is not full-bleed on wide viewports. Splash/landing has no
+  sidebar — use the wider content column (67.5rem) instead.
+*/
+:root {
+  --sl-frame-width: calc(
+    var(--sl-sidebar-width) + var(--sl-content-width) + var(--sl-sidebar-width)
+  );
+  --sl-frame-gutter: max(0rem, calc((100vw - var(--sl-frame-width)) / 2));
+  --sl-splash-frame-width: var(--sl-content-width);
+  --sl-splash-frame-gutter: max(
+    0rem,
+    calc((100vw - var(--sl-splash-frame-width)) / 2)
+  );
+}
+
+@media (min-width: 72rem) {
+  :root[data-has-sidebar] .page > header.header {
+    width: min(100%, var(--sl-frame-width));
+    inset-inline-start: var(--sl-frame-gutter);
+  }
+
+  :root[data-has-sidebar] .sidebar-pane {
+    inset-inline-start: var(--sl-frame-gutter);
+  }
+
+  :root[data-has-sidebar] .main-frame {
+    margin-inline: var(--sl-frame-gutter);
+  }
+
+  /* Landing / splash: align header with the centered content column */
+  :root:not([data-has-sidebar]) .page > header.header {
+    width: min(100%, var(--sl-splash-frame-width));
+    inset-inline-start: var(--sl-splash-frame-gutter);
+  }
+
+  /*
+    Always size the article column as if a TOC exists, and insert an empty
+    right rail when a page has no TOC. Stops the center column resizing
+    between Overview-style pages and short pages.
+  */
+  :root[data-has-sidebar] .main-pane {
+    --sl-content-margin-inline: auto 0;
+    order: 1;
+    width: min(
+      calc(100% - var(--sl-sidebar-width)),
+      calc(
+        var(--sl-content-width) +
+          (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
+      )
+    );
+  }
+
+  :root[data-has-sidebar]:not([data-has-toc])
+    .main-frame
+    > .lg\:sl-flex::after {
+    content: "";
+    order: 2;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    border-inline-start: 1px solid var(--sl-color-hairline);
+    width: max(
+      var(--sl-sidebar-width),
+      calc(
+        var(--sl-sidebar-width) +
+          (100% - var(--sl-content-width) - var(--sl-sidebar-width)) / 2
+      )
+    );
+  }
+}
