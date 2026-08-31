@@ -55,7 +55,10 @@ export default defineConfig({
         },
       ],
       plugins: [starlightBasePath()],
-      customCss: ["./src/styles/patina-tokens.css"],
+      customCss: [
+        "./src/styles/patina-tokens.css",
+        "./src/styles/splash-overrides.css",
+      ],
       social: [
         {
           icon: "github",
