@@ -16,8 +16,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.40.0",
     "astro": "^6.4.6",
-    "starlight-base-path": "^0.1.1",
-    "starlight-theme-vintage": "^0.1.0"
+    "starlight-base-path": "^0.1.1"
   },
   "overrides": {
     "esbuild": "^0.28.1",
