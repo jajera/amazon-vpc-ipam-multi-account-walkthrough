@@ -14,8 +14,8 @@
     "generate:diagram": "node scripts/generate-architecture-diagram.mjs"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.42.0",
-    "astro": "^7.3.2",
+    "@astrojs/starlight": "^0.42.1",
+    "astro": "^7.3.3",
     "starlight-base-path": "^0.2.1"
   },
   "overrides": {
